@@ -92,10 +92,8 @@ page
     * The encrypter user 
 7. Click **Next Step**
 8. On the policy review page, click **Create key**
-9. Click the newly-created key and record the followign data from the **ARN** (format: 
-`arn:aws:kms:[region]:[account_id]:key/[key_id]`
-    * `region`
-    * `key_id`
+9. Click the newly-created key and record the **ARN** (format: 
+`arn:aws:kms:[region]:[account_id]:key/[key_id]`)
 
 ### Create working directory/git repository for Lambda function
 
@@ -109,11 +107,11 @@ $ cd ~/projects/sample_organization
 $ git clone https://github.com/PublicNTP/stripe-processor-lambda stripe-processor
 ```
 
-### Make sure that the latest Python 3 PIP is installed
+### Make sure that the latest Python 3 executable and PIP is installed
 
 On Ubuntu 16.04, this is accomplished by 
 ```Shell
-$ sudo apt-get -y install python3-pip
+$ sudo apt-get -y install python3 python3-pip
 $ pip3 install --upgrade --user pip
 ```
 
@@ -123,6 +121,7 @@ $ pip3 install --upgrade --user pip
 $ pip3 install --upgrade --user awscli
 ```
 
+
 ### Prepare to encrypt Stripe secret token 
 
 The info you'll need at your fingertips to complete the step following this one:
@@ -131,10 +130,8 @@ The info you'll need at your fingertips to complete the step following this one:
 Identity and Access Management (IAM) users/roles > Secret token encrypter** step):
     * Access key ID
     * Secret access key
-2. The details of the KMS key (from the 
-**Installation > Create encryption key** step above):
-    * Key Region
-    * Key ID
+2. ARN of the KMS key (from the **Installation > Create encryption key** 
+step above)
 3. Stripe "Live key token"
     * Go to [API Keys](https://dashboard.stripe.com/account/apikeys) section of the Stripe Dashboard
     * Click **Reveal live key token**
@@ -144,12 +141,12 @@ Identity and Access Management (IAM) users/roles > Secret token encrypter** step
 Run:
 
 ``` Shell
-~/bin/encryptStripeSecretToken
+$ python3 CreateEncryptedToken.py
 ```
 
 The `encryptStripeSecretToken` script prompts the user for all data listed in the 
 previous section. It then accesses the cryptographic key material specified, and uses
-it to create the file `stripe_live_key_token.encrypted`
+it to create the file `lambda/stripe_live_key_token.encrypted`.
 
 ### Remove key usage permissions for encrypter user
 
