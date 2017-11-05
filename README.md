@@ -13,27 +13,46 @@ Yes. Sort of.
 
 The ones I found all store the payment key unecrypted, which is not
 something I'm personally comfortable with. So I wrote a version
-which leverages AWS Key Managment System (KMS) to decrypt the payment 
+which leverages AWS Key Management System (KMS) to decrypt the payment 
 token for a fraction of a second during the function's execution, 
 thus reducing the vulnerability of the secret token to being 
 compromised/leaked.
 
-## Configuration/Setup
+## Installation
 
-### Create Identity and Access Managment (IAM) role
+### Create Identity and Access Management (IAM) users/roles
 
-The lambda function executes with the permissions of the IAM user/role
+#### Lambda function
+
+The Lambda function executes with the permissions of the IAM user/role
 it is configured to execute as. We're creating a dedicated role for this
 Lambda function so the function runs with the least permissions possible.
 
-1. Go to the [IAM role](https://console.aws.amazon.com/iam/home#/roles) page
-and click the **Create role** button.
+1. Go to the [IAM roles](https://console.aws.amazon.com/iam/home#/roles) page
+and click the **Create role** button
 2. AWS will ask what service will use this role. Select **Lambda** and then 
 click **Next: Permissions**
 3. Do not attach any permissions policies (simply click **Next: Review** when 
 presented with the list of possible policies)
 4. On the **Review** page, enter a role name and description as fits your
-needs.
+needs
+
+
+#### Secret token encrypter
+
+You'll need to create a IAM user for the developer who will perform the initial
+encryption of the Stripe secret token.
+
+1. Go to the [IAM users](https://console.aws.amazon.com/iam/home#/users) page
+and click the **Add user** button
+2. Set the name for the account, and then select _only_ the "Programmatic access"
+checkbox under **Access Type**. Click **Next: Permissions**
+3. Do not add any permissions for the account, click **Next: Review**
+4. Ignore the warning that AWS (helpfully!) shows about creating a user with zero 
+permissions, and click **Create user**
+5. Click the option to display the user's _Secret access key_. Record both their
+_Access key ID_ and _Secret access key_
+
 
 ### Create encryption key
 
@@ -53,6 +72,12 @@ then click **Next Step**
 7. On the policy review page, click **Create key**
 8. Click the newly-created key and record it's **ARN** (of the format: 
 `arn:aws:kms:[region]:[account_id]:key/[key_id]`
+
+### Install AWS CLI 
+
+### Get Stripe Secret Token
+
+### Encrypt Stripe Secret Token
 
 
 
