@@ -51,7 +51,8 @@ checkbox under **Access Type**. Click **Next: Permissions**
 4. Ignore the warning that AWS (helpfully!) shows about creating a user with zero 
 permissions, and click **Create user**
 5. Click the option to display the user's _Secret access key_. Record both their
-_Access key ID_ and _Secret access key_
+_Access key ID_ and _Secret access key_. Once you've ensured you got both pieces
+of data correct, click **Close**
 
 
 ### Create encryption key
@@ -67,17 +68,35 @@ page
 3. Enter alias and description, click **Next Step**
 4. Enter any tags that you feel will help organize/identify the key, then click **Next Step**
 5. On the "Key Administrators" page, click **Next Step**
-6. On the "Key Usage Permissions" page, select the IAM role you created in the previous step,
-then click **Next Step**
-7. On the policy review page, click **Create key**
-8. Click the newly-created key and record it's **ARN** (of the format: 
+6. On the "Key Usage Permissions" page, select the following:
+    * The IAM role for the Lambda function 
+    * The encrypter user 
+7. Click **Next Step**
+8. On the policy review page, click **Create key**
+9. Click the newly-created key and record it's **ARN** (of the format: 
 `arn:aws:kms:[region]:[account_id]:key/[key_id]`
+
+### Create working directory/git repository for Lambda function
+
+Now is the point where you should create a directory to work from. 
+If you are going to work in `~/projects/sample_organization/stripe-processor` (for example),
+run:
+
+``` Shell
+mkdir -p ~/projects/sample_organization
+cd ~/projects/sample_organization
+git clone https://github.com/PublicNTP/stripe-processor-lambda stripe-processor
+```
 
 ### Install AWS CLI 
 
 ### Get Stripe Secret Token
 
 ### Encrypt Stripe Secret Token
+
+### Remove key usage permissions for encrypter user
+
+### Remove encrypter user account
 
 
 
