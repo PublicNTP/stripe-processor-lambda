@@ -42,6 +42,19 @@ work, an encryption key has to be created that will be used to both encrypt
 the secret token (done once), and decrypt the encrypted version of the secret
 token (performed every time the function executes).
 
+1. Go to the IAM [Encryption keys](https://console.aws.amazon.com/iam/home#/encryptionKeys/)
+page
+2. Click **Create key**
+3. Enter alias and description, click **Next Step**
+4. Enter any tags that you feel will help organize/identify the key, then click **Next Step**
+5. On the "Key Administrators" page, click **Next Step**
+6. On the "Key Usage Permissions" page, select the IAM role you created in the previous step,
+then click **Next Step**
+7. On the policy review page, click **Create key**
+8. Click the newly-created key and record it's **ARN** (of the format: 
+`arn:aws:kms:[region]:[account_id]:key/[key_id]`
+
+
 
 ## Legal
 
