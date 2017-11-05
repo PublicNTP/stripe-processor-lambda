@@ -107,20 +107,14 @@ $ cd ~/projects/sample_organization
 $ git clone https://github.com/PublicNTP/stripe-processor-lambda stripe-processor
 ```
 
-### Make sure that the latest Python 3 executable and PIP is installed
+### Make sure that the latest Python 3 executable, pip, and boto3 are installed
 
 On Ubuntu 16.04, this is accomplished by 
 ```Shell
 $ sudo apt-get -y install python3 python3-pip
-$ pip3 install --upgrade --user pip
+$ pip3 install --upgrade --user pip 
+$ pip3 install --upgrade --user boto3
 ```
-
-### Ensure latest version of AWS CLI is installed
-
-``` Shell
-$ pip3 install --upgrade --user awscli
-```
-
 
 ### Prepare to encrypt Stripe secret token 
 
@@ -146,11 +140,34 @@ $ python3 CreateEncryptedToken.py
 
 The `encryptStripeSecretToken` script prompts the user for all data listed in the 
 previous section. It then accesses the cryptographic key material specified, and uses
-it to create the file `lambda/stripe_live_key_token.encrypted`.
+it to create the file `lambda/stripe_encrypted_secret_key_token.dat`.
 
 ### Remove key usage permissions for encrypter user
 
+Now that the encrypted version of the key has been generated, remove the ability
+for the user to use the key again. Encrypting the token is a one-time operation,
+at this point the only thing that will need to be done is have the Lambda function
+decrypt the token at execution time.
+
+Go to the [Encryption keys](https://console.aws.amazon.com/iam/home#/encryptionKeys/) 
+console, then click the key used to encrypt the Stripe secret token.
+
+Scroll down to the **Key Users** section, check the box for the Secret Token Encrypter
+user account, and click **Remove**. 
+
+When asked to confirm the removal, select **Yes, remove**.
+
+The _only_ key user remaining should be the IAM role for the Lambda function.
+
 ### Remove encrypter user account
+
+We can now safely remove the dedicated IAM user we created for the sole purpose
+of creating the encrypted token.
+
+Go to the [Users](https://console.aws.amazon.com/iam/home#/users) section of the console,
+click the box next to the encrypter user account, and click the **Delete user** button.
+
+When asked to confirm the deltion, click **Yes, delete**.
 
 
 

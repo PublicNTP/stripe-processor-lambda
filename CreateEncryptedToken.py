@@ -1,5 +1,42 @@
+from __future__ import print_function
 import pprint
 import re
+import boto3
+import os
+
+_encryptedTokenFile = 'lambda/stripe_encrypted_secret_key_token.dat'
+
+def _testReadEncrypted():
+    with open( _encryptedTokenFile, 'rb' ) as readHandle:
+        encryptedBytes = readHandle.read()
+
+    kmsClient = boto3.client('kms', region_name=userdata['kms_key']['key_region'])
+
+    print( "Decrypted token: {0}".format(
+        kmsClient.decrypt(CiphertextBlob=encryptedBytes)['Plaintext'].decode('UTF-8')) )
+
+                
+
+
+def _writeEncryptedTokenToDisk(encryptedTokenBytes):
+    with open( _encryptedTokenFile, 'wb') as fileHandle:
+        fileHandle.write(encryptedTokenBytes)
+
+
+def _encryptToken(userdata):
+
+    # Update our running environment with the values that set access key id/secret access key
+    os.environ.update( userdata['lambda_role'] )
+     
+    kmsClient = boto3.client('kms', region_name=userdata['kms_key']['key_region'])
+
+    encryptResults = kmsClient.encrypt(
+        KeyId=userdata['kms_key']['key_arn'],
+        Plaintext=userdata['stripe']['secret_key_token'].encode('UTF-8') )
+
+    #pprint.pprint("\nEncrypt results:\n\n{0}".format(encryptResults) )
+
+    return encryptResults['CiphertextBlob']
 
 
 def _parseKeyArn(userdata):
@@ -23,13 +60,13 @@ def _getUserdata():
         {
             'user_prompt'       : 'Access Key ID',
             'data_group'        : 'lambda_role',
-            'data_key'          : 'access_key_id'
+            'data_key'          : 'AWS_ACCESS_KEY_ID'
         },
 
         {
             'user_prompt'       : 'Secret Access Key',
             'data_group'        : 'lambda_role',
-            'data_key'          : 'secret_access_key',
+            'data_key'          : 'AWS_SECRET_ACCESS_KEY'
         },
 
         {
@@ -56,11 +93,11 @@ def _getUserdata():
     return userdata
 
 
-def main():
+if __name__ == "__main__":
     userdata = _getUserdata()
 
-    print( "\n{0}".format(pprint.pformat(userdata)) )
+    # print( "\n{0}".format(pprint.pformat(userdata)) )
 
-     
-if __name__ == "__main__":
-    main()
+    _writeEncryptedTokenToDisk( _encryptToken(userdata) )
+
+    #_testReadEncrypted()
