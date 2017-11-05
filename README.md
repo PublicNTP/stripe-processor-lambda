@@ -7,16 +7,35 @@
 `strip-processor-lambda` is a package that simplifies the process of 
 setting up a system to receive payments/donations via Stripe.
 
-### Don't a lot of other pieces of code do this already?
+### Motivation
 
-Yes. Sort of.
+When I was undertaking this project, I paused and asked myself, 
+"Do I need to write this software? Can I leveraging existing code
+on the Internet to do this? 
 
-The ones I found all store the payment key unecrypted, which is not
-something I'm personally comfortable with. So I wrote a version
-which leverages AWS Key Management System (KMS) to decrypt the payment 
-token for a fraction of a second during the function's execution, 
-thus reducing the vulnerability of the secret token to being 
-compromised/leaked.
+Sort of.
+
+First, I didn't find any written in Python, which is my preferred
+language a the moment.
+
+Second, and more importantly, all the ones I found in my search 
+stored the payment key unecrypted, which is not something I'm 
+personally comfortable with. 
+
+Thus, I wrote this code to leverage a technique to protect the
+secret token which I first encountered when using the 
+New York Times Labs' [github-s3-deploy](https://github.com/nytlabs/github-s3-deploy) 
+tool:
+
+1. A symmetric key is created using the AWS Key Management System (KMS) 
+2. The plaintext secret token is encrypted using the KMS key
+3. The encrypted secret token is stored with the Lambda function
+4. At runtime, the Lambda function decrypts the secret token during its
+execution
+
+This approach means that the secret token is only unencrypted 
+durign execution of the Lambda function, thus reducing the 
+vulnerability of the secret token to being compromised/leaked.
 
 ## Installation
 
@@ -82,13 +101,27 @@ Now is the point where you should create a directory to work from.
 If you are going to work in `~/projects/sample_organization/stripe-processor` (for example),
 run:
 
-``` Shell
+```Shell
 mkdir -p ~/projects/sample_organization
 cd ~/projects/sample_organization
 git clone https://github.com/PublicNTP/stripe-processor-lambda stripe-processor
 ```
 
+### Make sure that PIP for Python 3 is installed
+
+On Ubuntu 16.04, this is accomplished by 
+```Shell
+sudo apt-get -y install python3-pip
+pip3 install --upgrade --user pip
+```
+
 ### Install AWS CLI 
+
+``` Shell
+pip3 install --upgrade --user awscli
+```
+
+
 
 ### Get Stripe Secret Token
 
