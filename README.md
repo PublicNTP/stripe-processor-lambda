@@ -4,7 +4,7 @@
 
 ### Description
 
-`strip-processor-lambda` is a package that simplifies the process of 
+`stripe-processor-lambda` is a package that simplifies the process of 
 setting up a system to receive payments/donations via Stripe.
 
 ### Motivation
@@ -28,13 +28,13 @@ New York Times Labs' [github-s3-deploy](https://github.com/nytlabs/github-s3-dep
 tool:
 
 1. A symmetric key is created using the AWS Key Management System (KMS) 
-2. The plaintext secret token is encrypted using the KMS key
+2. The plaintext secret token is unencrypted using the KMS key
 3. The encrypted secret token is stored with the Lambda function
 4. At runtime, the Lambda function decrypts the secret token during its
 execution
 
 This approach means that the secret token is only unencrypted 
-durign execution of the Lambda function, thus reducing the 
+during execution of the Lambda function, thus reducing the 
 vulnerability of the secret token to being compromised/leaked.
 
 ## Installation
@@ -142,7 +142,9 @@ The `encryptStripeSecretToken` script prompts the user for all data listed in th
 previous section. It then accesses the cryptographic key material specified, and uses
 it to create the file `lambda/stripe_encrypted_secret_key_token.dat`.
 
-### Remove key usage permissions for encrypter user
+### Remove key permissions/account
+
+#### Remove key usage permissions for encrypter user
 
 Now that the encrypted version of the key has been generated, remove the ability
 for the user to use the key again. Encrypting the token is a one-time operation,
@@ -159,7 +161,7 @@ When asked to confirm the removal, select **Yes, remove**.
 
 The _only_ key user remaining should be the IAM role for the Lambda function.
 
-### Remove encrypter user account
+#### Remove encrypter user account
 
 We can now safely remove the dedicated IAM user we created for the sole purpose
 of creating the encrypted token.
@@ -167,7 +169,17 @@ of creating the encrypted token.
 Go to the [Users](https://console.aws.amazon.com/iam/home#/users) section of the console,
 click the box next to the encrypter user account, and click the **Delete user** button.
 
-When asked to confirm the deltion, click **Yes, delete**.
+When asked to confirm the deletion, click **Yes, delete**.
+
+### Get latest version of stripe Python library and dependencies
+
+``` Shell
+pip3 install -t ./lambda stripe
+```
+
+The `-t` flag tells `pip3` to install the packages underneath the `lambda` directory, 
+allowing all the packages to be included when we deploy our lambda function
+
 
 
 
