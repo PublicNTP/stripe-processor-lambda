@@ -1,3 +1,4 @@
 .*.swp
 lambda/*.dat
 lambda/*/
+lambda/*.zip
