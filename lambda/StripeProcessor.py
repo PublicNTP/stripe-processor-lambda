@@ -10,11 +10,9 @@ def process_payment(event, context):
     logger = logging.getLogger()
     logger.setLevel( logging.INFO)
 
-    paymentDetails = _parseLogPaymentDetails(event['body'], logger)
+    paymentDetails = _parseLogPaymentDetails(event, logger)
 
-    _setStripeApiKey(logger)
-
-    return { 'status': _submitPaymentRequest(paymentDetails, logger) }
+    return _submitPaymentRequest(paymentDetails, logger)
 
 
 
@@ -45,13 +43,24 @@ def _setStripeApiKey(logger):
 
 
 def _submitPaymentRequest(paymentDetails, logger):
-    chargeResponse = stripe.Charge.create( 
-        amount      = paymentDetails['amount'],
-        currency    = paymentDetails['currency'],
-        source      = paymentDetails['source'],
-        description = paymentDetails['description']
-    )
+    _setStripeApiKey(logger)
 
-    #pprint.pprint("Charge response:\n{0}".format(chargeResponse))
-
-    return chargeResponse['status'] 
+    try:
+        chargeResponse = stripe.Charge.create( 
+            amount      = paymentDetails['amount'],
+            currency    = paymentDetails['currency'],
+            source      = paymentDetails['source'],
+            description = paymentDetails['description']
+        )
+    except stripe.error.CardError as e:
+        body = e.json_body
+        err = body.get('error', {})
+        return {
+            'status'        : "error",
+            'type'          : err.get('type'),
+            'code'          : err.get('code'),
+            'message'       : err.get('message')
+        }
+    else:
+        # No exception thrown -- happy case!
+        return { 'status': chargeResponse['status'] }
