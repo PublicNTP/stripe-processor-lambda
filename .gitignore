@@ -2,3 +2,4 @@
 lambda/*.dat
 lambda/*/
 lambda/*.zip
+test/*.json
