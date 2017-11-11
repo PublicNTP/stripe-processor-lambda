@@ -17,7 +17,7 @@ def process_payment(event, context):
 
 
 def _parseLogPaymentDetails(paymentRequest, logger):
-    logger.info( "New pament processing request received:\n{0}".format(
+    logger.info( "New payment processing request received:\n{0}".format(
         pprint.pformat(paymentRequest)) )
 
     # Need to validate body here, maybe need XSD and have front end pass
@@ -28,8 +28,8 @@ def _parseLogPaymentDetails(paymentRequest, logger):
 
 
 
-def _setStripeApiKey(logger):
-    encryptedTokenFile = 'stripe_encrypted_secret_key_token.dat'
+def _setStripeApiKey(stripeKeyType, logger):
+    encryptedTokenFile = 'stripe_encrypted_{0}_secret_key_token.dat'.format(stripeKeyType)
 
     with open( encryptedTokenFile, 'rb' ) as readHandle:
         encryptedBytes = readHandle.read()
@@ -43,7 +43,10 @@ def _setStripeApiKey(logger):
 
 
 def _submitPaymentRequest(paymentDetails, logger):
-    _setStripeApiKey(logger)
+    stripeKeyType = paymentDetails['stripe_key']
+    del paymentDetails['stripe_key']
+
+    _setStripeApiKey(stripeKeyType, logger)
 
     try:
         chargeResponse = stripe.Charge.create( 
