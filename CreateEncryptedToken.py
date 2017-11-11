@@ -3,40 +3,37 @@ import pprint
 import re
 import boto3
 import os
-
-_encryptedTokenFile = 'lambda/stripe_encrypted_secret_key_token.dat'
-
-def _testReadEncrypted():
-    with open( _encryptedTokenFile, 'rb' ) as readHandle:
-        encryptedBytes = readHandle.read()
-
-    kmsClient = boto3.client('kms', region_name=userdata['kms_key']['key_region'])
-
-    print( "Decrypted token: {0}".format(
-        kmsClient.decrypt(CiphertextBlob=encryptedBytes)['Plaintext'].decode('UTF-8')) )
-
-                
+import argparse
 
 
-def _writeEncryptedTokenToDisk(encryptedTokenBytes):
-    with open( _encryptedTokenFile, 'wb') as fileHandle:
-        fileHandle.write(encryptedTokenBytes)
+def _writeEncryptedTokens(userdata):
+ 
+    encryptedTokens = _encryptTokens(userdata)
+
+    for keyType in [ 'test', 'live' ]:
+        #pprint.pprint(encryptedTokens[keyType])
+        with open( "lambda/stripe_encrypted_{0}_secret_key_token.dat".format(keyType), 'wb') as fileHandle:
+            fileHandle.write( encryptedTokens[keyType] )
 
 
-def _encryptToken(userdata):
+def _encryptTokens(userdata):
 
     # Update our running environment with the values that set access key id/secret access key
     os.environ.update( userdata['lambda_role'] )
      
     kmsClient = boto3.client('kms', region_name=userdata['kms_key']['key_region'])
 
-    encryptResults = kmsClient.encrypt(
-        KeyId=userdata['kms_key']['key_arn'],
-        Plaintext=userdata['stripe']['secret_key_token'].encode('UTF-8') )
+    encryptedTokens = {}
+
+    for keyType in [ 'test', 'live' ]:
+        encryptedTokens[keyType] = kmsClient.encrypt(
+            KeyId=userdata['kms_key']['key_arn'],
+            Plaintext=userdata['stripe']['plaintext_{0}_secret_key_token'.format(keyType)].encode('UTF-8'))['CiphertextBlob']
+
 
     #pprint.pprint("\nEncrypt results:\n\n{0}".format(encryptResults) )
 
-    return encryptResults['CiphertextBlob']
+    return encryptedTokens
 
 
 def _parseKeyArn(userdata):
@@ -54,39 +51,37 @@ def _parseKeyArn(userdata):
     )
    
 
-def _getUserdata():
-    userdata = {}
-    promptData = [
-        {
-            'user_prompt'       : 'Access Key ID',
-            'data_group'        : 'lambda_role',
-            'data_key'          : 'AWS_ACCESS_KEY_ID'
+def _createUserdata():
+    argParser = argparse.ArgumentParser(description="Create encrypted token for Stripe processing backend")
+
+    argParser.add_argument("access_key_id", 
+        help="AWS Access Key ID used to access encryption key")
+    argParser.add_argument("secret_access_key", 
+        help="AWS Secret Access Key used to access encryption key")
+    argParser.add_argument("kms_key_arn", 
+        help="ARN of KMS encryption key")
+    argParser.add_argument("plaintext_stripe_test_secret_key_token", 
+        help="Plaintext (unencrypted) Stripe test secret key token"),
+    argParser.add_argument("plaintext_stripe_live_secret_key_token",
+        help="Plaintext (unencrypted) Stripe *LIVE* secret key token")
+
+    parsedArgs = argParser.parse_args()
+
+    userdata = {
+        'lambda_role': {
+            'AWS_ACCESS_KEY_ID'                 : parsedArgs.access_key_id,
+            'AWS_SECRET_ACCESS_KEY'             : parsedArgs.secret_access_key
         },
 
-        {
-            'user_prompt'       : 'Secret Access Key',
-            'data_group'        : 'lambda_role',
-            'data_key'          : 'AWS_SECRET_ACCESS_KEY'
+        'kms_key': {
+            'key_arn'                           : parsedArgs.kms_key_arn
         },
 
-        {
-            'user_prompt'       : 'AWS KMS encryption key for secret token',
-            'data_group'        : 'kms_key',
-            'data_key'          : 'key_arn'
-        },
-
-        {
-            'user_prompt'       : 'Stripe Secret Key Token',
-            'data_group'        : 'stripe',
-            'data_key'          : 'secret_key_token'
+        'stripe': {
+            'plaintext_test_secret_key_token'   : parsedArgs.plaintext_stripe_test_secret_key_token,
+            'plaintext_live_secret_key_token'   : parsedArgs.plaintext_stripe_live_secret_key_token
         }
-    ]
-
-    for currPrompt in promptData:
-        if currPrompt['data_group'] not in userdata:
-            userdata[currPrompt['data_group']] = {}
-        userdata[currPrompt['data_group']][currPrompt['data_key']] = \
-            input( "Please input the {0}: ".format( currPrompt['user_prompt']) ).strip()
+    }
 
     _parseKeyArn(userdata)
 
@@ -94,10 +89,10 @@ def _getUserdata():
 
 
 if __name__ == "__main__":
-    userdata = _getUserdata()
+    userdata = _createUserdata()
 
     # print( "\n{0}".format(pprint.pformat(userdata)) )
 
-    _writeEncryptedTokenToDisk( _encryptToken(userdata) )
+    _writeEncryptedTokens( userdata )
 
     #_testReadEncrypted()

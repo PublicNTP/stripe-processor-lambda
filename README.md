@@ -135,12 +135,13 @@ step above)
 Run:
 
 ``` Shell
-$ python3 CreateEncryptedToken.py
+$ python3 CreateEncryptedToken.py [aws_access_key_id] [aws_secret_access_key] [kms_key_id] \
+    [plaintext_stripe_test_secret_key_token] [plaintext_stripe_live_secret_key_token]
 ```
 
-The `encryptStripeSecretToken` script prompts the user for all data listed in the 
-previous section. It then accesses the cryptographic key material specified, and uses
-it to create the file `lambda/stripe_encrypted_secret_key_token.dat`.
+The `encryptStripeSecretToken` script accesses the cryptographic key material specified, 
+then uses it to create the files `lambda/stripe_encrypted_test_secret_key_token.dat` and
+`lambda/stripe_encrypted_live_secret_key_token.dat`.
 
 ### Remove key permissions/account
 
