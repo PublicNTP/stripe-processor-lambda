@@ -3,6 +3,7 @@ import boto3
 import stripe
 import logging
 import pprint
+import json
 
 
 def process_payment(event, context):
@@ -22,7 +23,7 @@ def _parseLogPaymentDetails(paymentRequest, logger):
 
     # Need to validate body here, maybe need XSD and have front end pass
     #   XML?
-    paymentDetails = paymentRequest['payment_info']['required']
+    paymentDetails = paymentRequest['payment_info']
 
     return paymentDetails
 
@@ -43,6 +44,10 @@ def _setStripeApiKey(stripeKeyType, logger):
 
 
 def _submitPaymentRequest(paymentDetails, logger):
+    resultsLog = {
+        'payment_details': paymentDetails 
+    }
+
     stripeKeyType = paymentDetails['stripe_key']
     del paymentDetails['stripe_key']
 
@@ -50,20 +55,28 @@ def _submitPaymentRequest(paymentDetails, logger):
 
     try:
         chargeResponse = stripe.Charge.create( 
-            amount      = paymentDetails['amount'],
-            currency    = paymentDetails['currency'],
-            source      = paymentDetails['source'],
-            description = paymentDetails['description']
+            amount          = paymentDetails['amount'],
+            currency        = paymentDetails['currency'],
+            source          = paymentDetails['source'],
+            description     = paymentDetails['description'],
+            receipt_email   = paymentDetails['receipt_email']
         )
     except stripe.error.CardError as e:
         body = e.json_body
         err = body.get('error', {})
-        return {
+
+        errorDetails = {
             'status'        : "error",
             'type'          : err.get('type'),
             'code'          : err.get('code'),
             'message'       : err.get('message')
         }
+        resultsLog['stripe_response'] = errorDetails
+
+        return errorDetails
+
     else:
         # No exception thrown -- happy case!
+        resultsLog['stripe_response'] = chargeResponse
+
         return { 'status': chargeResponse['status'] }

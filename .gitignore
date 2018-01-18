@@ -3,3 +3,5 @@ lambda/*.dat
 lambda/*/
 lambda/*.zip
 test/*.json
+lambda/rsaPublicKey.pem
+lambda/s3BucketName.txt

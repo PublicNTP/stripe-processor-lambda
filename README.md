@@ -175,14 +175,20 @@ When asked to confirm the deletion, click **Yes, delete**.
 ### Get latest version of stripe Python library and dependencies
 
 ``` Shell
-pip3 install -t ./lambda stripe
+pip3 install -t ./lambda stripe 
 ```
 
 The `-t` flag tells `pip3` to install the packages underneath the `lambda` directory, 
 allowing all the packages to be included when we deploy our lambda function
 
 
+### Get latest version of PyCryptodome Python library and dependencies
 
+``` Shell
+pip3 install -t ./lambda pycryptodome
+```
+
+PyCryptodome provides an implementation of RSA public key (aka, "asymmetric") encryption.
 
 ## Legal
 

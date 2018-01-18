@@ -7,35 +7,34 @@ if __name__ == "__main__":
 
     paymentStatus = StripeProcessor.process_payment(
         { 
-            'body': {
-                'payment_info': {
-                    'required': {
-                        'amount'        : 762,
-                        'currency'      : 'usd',
-                        'source'        : 'tok_visa',
-                        'description'   : 'Test donation'
+            'payment_info': {
+                'required': {
+                    'amount'        : 762,
+                    'currency'      : 'usd',
+                    'source'        : 'tok_visa',
+                    'description'   : 'Test donation',
+                    'stripe_key'    : 'test'
+                },
+
+                'optional': {
+                    'name': {
+                        'Last'  : 'Person', 
+                        'First' : 'Test' 
                     },
 
-                    'optional': {
-                        'name': {
-                            'Last'  : 'Person', 
-                            'First' : 'Test' 
-                        },
+                    'address': {
+                        'street_lines'          : [
+                            '123 N 7608 E',
+                            'Apt 819'
+                        ],
+                        'city'                  : 'YupACity',
+                        'state_province_region' : 'QC',
+                        'country'               : 'CA'
+                    },
 
-                        'address': {
-                            'street_lines'          : [
-                                '123 N 7608 E',
-                                'Apt 819'
-                            ],
-                            'city'                  : 'YupACity',
-                            'state_province_region' : 'QC',
-                            'country'               : 'CA'
-                        },
+                    'email' : 'test.person@test.email',
 
-                        'email' : 'test.person@test.email',
-
-                        'phone' : '+44-234233347'
-                    }
+                    'phone' : '+44-234233347'
                 }
             }
         },
