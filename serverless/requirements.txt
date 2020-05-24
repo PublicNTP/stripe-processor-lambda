@@ -1,6 +1,6 @@
-certifi==2018.8.24
+certifi==2020.4.5.1
 chardet==3.0.4
-idna==2.7
-requests==2.19.1
-stripe==2.7.0
-urllib3==1.23
+idna==2.9
+requests==2.23.0
+stripe==2.48.0
+urllib3==1.25.9

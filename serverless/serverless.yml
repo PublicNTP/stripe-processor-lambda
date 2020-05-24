@@ -39,4 +39,3 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
-
