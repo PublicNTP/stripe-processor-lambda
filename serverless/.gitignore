@@ -22,3 +22,5 @@ var/
 node_modules/
 package.json
 venv/
+
+package-lock.json

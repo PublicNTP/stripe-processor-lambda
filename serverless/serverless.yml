@@ -15,7 +15,9 @@ service: PNTPStripePayment
 
 provider:
   name: aws
-  runtime: python3.6
+  runtime: python3.8
+  apiGateway:
+    shouldStartNameWithService: true
   iamRoleStatements:
   - Effect: "Allow"
     Action: kms:*
@@ -25,7 +27,7 @@ functions:
   StripePaymentProcessor:
     handler: StripeProcessor.process_payment
     description: PublicNTP Stripe Payment Processing backend
-    memorySize: 128     # MB
+    memorySize: 1792    # MB -- overkill? yes. It also gets us a full vCPU, so we're not CPU bound
     timeout: 10         # seconds
     events:
         - http:
@@ -38,4 +40,4 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: non-linux
+    dockerizePip: true
